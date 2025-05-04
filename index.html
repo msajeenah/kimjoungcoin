@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>KIMJONG Chatbot</title>
+</head>
+<body>
+  <h1>KIMJONG Chat</h1>
+  <div id="chatbox" style="max-height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;"></div>
+  <input id="userInput" placeholder="Type your message..." style="width: 80%;" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const input = document.getElementById('userInput');
+
+    function appendMessage(sender, text) {
+      const msg = document.createElement('div');
+      msg.innerHTML = `<b>${sender}:</b> ${text}`;
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+      appendMessage("You", userText);
+      input.value = '';
+
+      fetch('http://localhost:3000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userText })
+      })
+      .then(res => res.json())
+      .then(data => {
+        appendMessage("KIMBOT", data.reply);
+      })
+      .catch(err => {
+        appendMessage("KIMBOT", "⚠️ Error connecting to AI.");
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>

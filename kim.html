@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KIMJONG Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      font-family: 'Anton', sans-serif;
+      overscroll-behavior-y: contain;
+    }
+    .social-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: #b22222;
+      transition: transform 0.3s ease, fill 0.3s ease;
+    }
+    .social-icon:hover svg {
+      transform: scale(1.2);
+      fill: #ff0000;
+    }
+    @media (max-width: 768px) {
+      .input-wrapper-fixed {
+        position: sticky;
+        bottom: 0;
+        background: black;
+        z-index: 50;
+      }
+    }
+  </style>
+</head>
+<body class="bg-black text-white flex flex-col min-h-screen overflow-auto">
+  <div id="headerSection" class="w-full relative px-4 py-6">
+    <div class="absolute top-4 right-4">
+      <button onclick="connectWallet()" class="text-sm md:text-base text-red-600 hover:underline transition relative">
+        Connect Your Wallet
+      </button>
+    </div>
+    <div class="absolute top-4 left-4 flex flex-row space-x-4 sm:flex-col sm:space-y-4 sm:space-x-0">
+      <a href="https://x.com/kimJong_Ai" target="_blank" rel="noopener noreferrer" class="social-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.393 3H24L15.738 11.197 25.059 22h-7.196l-6.177-7.205L4.76 22H1.069l9.072-9.616L.326 3h7.415l5.604 6.595L20.393 3zm-2.396 17h1.79L7.94 4H6.082l11.915 16z"/></svg>
+      </a>
+      <a href="https://t.me/kimjongai" target="_blank" rel="noopener noreferrer" class="social-icon">
+        <svg viewBox="0 0 24 24"><path d="M9.5 16.2l-.4 4.2c.6 0 .9-.3 1.2-.6l2.5-2.3 5.2 3.8c1 .6 1.7.3 2-.9l3.6-16c.4-1.4-.5-2-1.5-1.7l-21.1 8c-1.4.5-1.4 1.3-.3 1.7l5.4 1.6L19 6.5c.5-.2 1-.1.6.2l-9.7 8.9z"/></svg>
+      </a>
+    </div>
+    <div class="text-center mt-16">
+      <h1 class="text-2xl md:text-5xl lg:text-6xl text-red-600">KIMJONG</h1>
+      <p id="walletAddress" class="text-red-600 text-sm md:text-base font-normal cursor-pointer hover:opacity-80 transition" onclick="copyToClipboard()" title="Click to copy">
+        CA: xxxxxxxxxxxxxx
+      </p>
+    </div>
+  </div>
+
+  <div id="chatbox" class="flex-1 px-4 pb-32 overflow-y-auto max-w-md w-full mx-auto text-sm space-y-2 h-0 grow"></div>
+  <div class="w-full bg-black px-4 fixed bottom-20 z-50">
+    <div id="promptMessage" class="mx-auto max-w-md mb-2 text-sm text-red-600 text-center">
+      Don’t waste my time. Say something.
+    </div>
+  </div>
+  <div class="w-full bg-black px-4 py-4 fixed bottom-0 left-0 right-0 z-50">
+    <div class="mx-auto max-w-md flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-full shadow-md">
+      <input id="userInput" type="text" placeholder="Message KIMBOT..." class="flex-1 bg-transparent text-base text-gray-800 focus:outline-none" onfocus="" oninput="document.getElementById('promptMessage').style.display = this.value.trim() ? 'none' : 'block';" />
+      <button onclick="sendMessage()" class="text-gray-400 hover:text-blue-500 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21l16.5-9L3.75 3v7.5L15 12l-11.25 1.5V21z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const input = document.getElementById('userInput');
+
+    // Auto-focus removed to avoid mobile keyboard issues
+    input.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
+    function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+      appendMessage("You", userText);
+      input.value = '';
+      setTimeout(() => {
+        appendMessage("KIMBOT", "...");
+        setTimeout(() => {
+          chatbox.lastChild.remove();
+          appendMessage("KIMBOT", getAggressiveReply(userText));
+        }, 800);
+      }, 400);
+    }
+
+    function appendMessage(sender, text) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex ${sender === "KIMBOT" ? 'justify-start' : 'justify-end'}`;
+      const bubble = document.createElement("div");
+      bubble.className = `px-4 py-2 rounded-2xl shadow-md max-w-[75%] break-words ${sender === "KIMBOT" ? 'text-white' : 'bg-white text-black'}`;
+      if (sender === "KIMBOT") bubble.style.background = 'linear-gradient(135deg, #8B0000, #A52A2A, #B22222, #800000)';
+      bubble.innerHTML = `<strong class="text-xs opacity-50 block">${sender}</strong>${text}`;
+      wrapper.appendChild(bubble);
+      chatbox.appendChild(wrapper);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function copyToClipboard() {
+      const address = document.getElementById("walletAddress").innerText.replace("CA: ", "");
+      navigator.clipboard.writeText(address).then(() => showToast("Wallet address copied!"));
+    }
+
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.textContent = message;
+      toast.className = "fixed bottom-28 left-1/2 transform -translate-x-1/2 bg-red-700 text-white px-4 py-2 rounded-xl shadow-md z-50 animate-bounce";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    function connectWallet() {
+      const bubble = document.createElement('div');
+      bubble.textContent = "Coming soon";
+      bubble.className = "absolute top-10 right-0 mt-2 px-3 py-1 bg-red-700 text-white text-sm rounded shadow-lg animate-bounce";
+      document.querySelector('div.absolute.top-4.right-4').appendChild(bubble);
+      setTimeout(() => bubble.remove(), 2000);
+    }
+  </script>
+  <script>
+    function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      appendMessage("You", userText);
+      input.value = '';
+
+      appendMessage("KIMBOT", "...");
+
+      fetchReply(userText)
+        .then(reply => {
+          chatbox.lastChild.remove();
+          appendMessage("KIMBOT", reply);
+        })
+        .catch(err => {
+          chatbox.lastChild.remove();
+          appendMessage("KIMBOT", "⚠️ Failed to reach OpenAI.");
+          console.error(err);
+        });
+    }
+
+    function fetchReply(message) {
+      return fetch("https://your-backend.onrender.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      })
+        .then(res => res.json())
+        .then(data => data.reply || "No reply received.");
+    }
+  </script>
+</body>
+</html>
